@@ -3,12 +3,13 @@ import random
 from mido import Message, MidiFile, MidiTrack
 
 #毎回変える部分
-seed = 6
+seed = 2
 #一小節一個のMIDI番号
-stem = [59+12, 54+12, 61+12, 61+12, 59+12, 57+12, 56+12, 57+12] #メロディの幹．number_of_measure個のリスト. keyに合う音を入れる必要あり
+stem = [] #メロディの幹．number_of_measure個のリスト. keyに合う音を入れる必要あり
 key = 4 #キー．0~11の整数．Cが0
 tempo =116; #テンポ
-filename=f"3sig_{seed}_melody.mid"
+filename=f"A1_{seed}_melody.mid"
+fileStem = "A1.mid"
 
 random.seed(seed)
 mid = MidiFile()
@@ -16,7 +17,7 @@ track = MidiTrack()
 mid.tracks.append(track)
 #一単位の時間を設定
 unit = 480 # 4分音符を1単位とする
-signature = 3 #拍子
+signature = 3 #拍子 ここ変える場合プログラムも変更する必要あり
 pattern = [] #i+1小節目のパターン番号．4/4拍子の場合は事前に決めた0~4. 
 note_order = [] #一小節内の音符の順番
 order_bank = [] #音符のリスト.
@@ -74,7 +75,13 @@ def init():
         melody.append(0)
         degree.append(0)
 
-
+#midiファイルを読み込みstemに格納するメソッド
+def read_midi():
+    midStem = MidiFile(fileStem)
+    trackStem = midStem.tracks[0]
+    for msg in trackStem:
+        if msg.type == 'note_on':
+            stem.append(msg.note)
 
 #patternを決めて返すメソッド
 def update_pattern():
@@ -172,8 +179,9 @@ def write_midi(note_order, melody):
 
 
 init()
+read_midi()
 pattern = update_pattern()
-for i in range(number_of_measure): #八小節分のパターンを作成
+for i in range(number_of_measure): 
     note_order = update_note_order(pattern[i]) 
     order_bank[i] = note_order
 for i in range(number_of_measure):
